@@ -171,6 +171,8 @@ object ClockRenderer {
         }
         rows += Row("min", t.minute, 6, s.colorMin)
         if (seconds) rows += Row("sec", t.second, 6, s.colorSec)
+        // Hours last: bottom row in row mode, right column in vertical mode.
+        if (s.reverse) rows.reverse()
 
         if (s.vertical) drawVertical(canvas, width, height, s, p, t, seconds, rows, maxLamp, padding)
         else drawHorizontal(canvas, width, height, s, p, t, seconds, rows, maxLamp, padding)

@@ -1,6 +1,7 @@
 package app.binaryclock
 
 import android.app.Activity
+import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
@@ -82,11 +83,14 @@ class ClockActivity : Activity() {
     }
 
     private fun update(next: ClockSettings) {
+        val relabel = next.vertical != settings.vertical
         settings = next
         settings.save(this)
         clock.settings = settings
         applyKeepScreenOn()
         BinaryClockWidget.updateAll(this)
+        // The "Hours on ..." label depends on the layout; rebuild after the toggle finishes.
+        if (relabel) list.post { buildControls() }
     }
 
     private fun applyKeepScreenOn() {
@@ -108,6 +112,9 @@ class ClockActivity : Activity() {
         toggle("12-hour time", settings.h12) { settings.copy(h12 = it) }
         toggle("Vertical columns", settings.vertical) { settings.copy(vertical = it) }
         toggle("Flip bit order", settings.flip) { settings.copy(flip = it) }
+        toggle(
+            if (settings.vertical) "Hours on right" else "Hours on bottom", settings.reverse,
+        ) { settings.copy(reverse = it) }
         toggle("Keep screen on", settings.keepScreenOn) { settings.copy(keepScreenOn = it) }
 
         header("Colors")
@@ -119,6 +126,12 @@ class ClockActivity : Activity() {
         note(getString(R.string.widget_note))
         toggle("Widget background", settings.widgetBackground) { settings.copy(widgetBackground = it) }
         button("Add widget to home screen") { pinWidget() }
+
+        header("Wallpaper")
+        note(getString(R.string.wallpaper_note))
+        toggle("Show seconds", settings.wallpaperSeconds) { settings.copy(wallpaperSeconds = it) }
+        toggle("Black background", settings.wallpaperBlack) { settings.copy(wallpaperBlack = it) }
+        button("Set as live wallpaper") { openWallpaperPicker() }
 
         header("Screen saver")
         note(getString(R.string.dream_note))
@@ -231,6 +244,19 @@ class ClockActivity : Activity() {
             manager.requestPinAppWidget(ComponentName(this, BinaryClockWidget::class.java), null, null)
         } else {
             Toast.makeText(this, R.string.widget_manual, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun openWallpaperPicker() {
+        try {
+            startActivity(
+                Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).putExtra(
+                    WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                    ComponentName(this, BinaryClockWallpaper::class.java),
+                ),
+            )
+        } catch (e: ActivityNotFoundException) {
+            startActivity(Intent(WallpaperManager.ACTION_LIVE_WALLPAPER_CHOOSER))
         }
     }
 

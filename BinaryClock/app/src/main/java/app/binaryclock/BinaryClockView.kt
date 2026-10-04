@@ -45,6 +45,8 @@ class BinaryClockView @JvmOverloads constructor(
     }
 
     init {
+        // The lamp glow uses a shadow layer, which hardware canvases only draw for text.
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_YES
     }
 

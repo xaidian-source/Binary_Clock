@@ -14,9 +14,13 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          build-root-directory: BinaryClock
       - run: chmod +x gradlew
+        working-directory: BinaryClock
       - run: ./gradlew assembleDebug
+        working-directory: BinaryClock
       - uses: actions/upload-artifact@v4
         with:
           name: binary-clock-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: BinaryClock/app/build/outputs/apk/debug/*.apk

@@ -12,9 +12,12 @@ data class ClockSettings(
     val h12: Boolean = false,
     val flip: Boolean = false,
     val vertical: Boolean = false,
+    val reverse: Boolean = false,
     val keepScreenOn: Boolean = false,
     val widgetBackground: Boolean = true,
     val dreamBlack: Boolean = true,
+    val wallpaperSeconds: Boolean = true,
+    val wallpaperBlack: Boolean = true,
     val colorHour: String = "default",
     val colorMin: String = "default",
     val colorSec: String = "default",
@@ -28,9 +31,12 @@ data class ClockSettings(
             .putBoolean("h12", h12)
             .putBoolean("flip", flip)
             .putBoolean("vertical", vertical)
+            .putBoolean("reverse", reverse)
             .putBoolean("wake", keepScreenOn)
             .putBoolean("widget_bg", widgetBackground)
             .putBoolean("dream_black", dreamBlack)
+            .putBoolean("wp_seconds", wallpaperSeconds)
+            .putBoolean("wp_black", wallpaperBlack)
             .putString("color_h", colorHour)
             .putString("color_m", colorMin)
             .putString("color_s", colorSec)
@@ -52,9 +58,12 @@ data class ClockSettings(
                 h12 = p.getBoolean("h12", d.h12),
                 flip = p.getBoolean("flip", d.flip),
                 vertical = p.getBoolean("vertical", d.vertical),
+                reverse = p.getBoolean("reverse", d.reverse),
                 keepScreenOn = p.getBoolean("wake", d.keepScreenOn),
                 widgetBackground = p.getBoolean("widget_bg", d.widgetBackground),
                 dreamBlack = p.getBoolean("dream_black", d.dreamBlack),
+                wallpaperSeconds = p.getBoolean("wp_seconds", d.wallpaperSeconds),
+                wallpaperBlack = p.getBoolean("wp_black", d.wallpaperBlack),
                 colorHour = p.getString("color_h", null) ?: d.colorHour,
                 colorMin = p.getString("color_m", null) ?: d.colorMin,
                 colorSec = p.getString("color_s", null) ?: d.colorSec,

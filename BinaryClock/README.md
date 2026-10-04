@@ -1,14 +1,15 @@
 # Binary Clock for Android
 
-A native port of the binary clock artifact. One app gives you three clocks:
+A native port of the binary clock artifact. One app gives you four clocks:
 
 - **App** – full screen with seconds. Tap the clock to hide the settings and system bars.
 - **Widget** – hours and minutes, for the home screen and the lock screen widget page.
+- **Live wallpaper** – home screen, lock screen, or both. Ticks every second while the screen is on and does nothing while it's off. On the lock screen the clock sits below the system clock.
 - **Screen saver** – full clock with seconds while charging; dark, dimmed, and drifting slightly to protect the screen.
 
-All three share the same settings (colors, shapes, 12-hour time, bit order, and so on).
+All of them share the same settings (colors, shapes, 12-hour time, bit order, and so on).
 
-**Vertical columns** turns each row into a column (hour, min, sec side by side), with values rising upward. Flip bit order puts the 1s at the top instead, and Show values becomes a single shared scale on the left. For the widget in this mode, resize it taller than it is wide.
+**Vertical columns** turns each row into a column (hour, min, sec side by side), with values rising upward. **Hours on bottom / right** reverses the row order. Flip bit order puts the 1s at the top instead, and Show values becomes a single shared scale on the left. For the widget in this mode, resize it taller than it is wide.
 
 Requires Android 13 or newer. No third-party libraries.
 
@@ -33,10 +34,14 @@ Builds use a fixed signing key (`app/debug.keystore`), so new versions install o
 ## Set up each clock
 - **Home screen widget:** open the app and tap "Add widget to home screen", or long-press the home screen → Widgets → Binary Clock. Resize it freely.
 - **Lock screen:** Settings → Display & touch → Lock screen → turn on "Widgets on lock screen". Then swipe in from the right edge of the lock screen, long-press, and add Binary Clock.
+- **Wallpaper:** open the app and tap "Set as live wallpaper", then choose home screen, lock screen, or both. For the lock screen, also check Wallpaper & style for the system clock options (Android won't let any app replace the system clock itself).
 - **Screen saver:** open the app and tap "Open screen saver settings" (or Settings → Display & touch → Screen saver), pick Binary clock, and choose when it starts (while charging, docked, or both).
 
 ## How the widget stays in time
-Widgets can't run animations, so the clock is drawn as an image once a minute, timed to the minute boundary. The alarm does not wake the phone: nothing runs while the screen is off, and the widget refreshes as soon as the phone is awake again. The `USE_EXACT_ALARM` permission makes that timing exact; it's granted automatically for sideloaded apps.
+Widgets can't run animations, so the clock is drawn as an image once a minute, timed to the minute boundary. The alarm does not wake the phone: nothing runs while the screen is off, and the widget refreshes as soon as the phone is awake again. A 30-minute system update backs the alarm up, so a missed tick can never leave the widget stale for long. The `USE_EXACT_ALARM` permission makes that timing exact; it's granted automatically for sideloaded apps.
+
+## What can't be replaced
+The always-on display, the status bar clock and the system lock screen clock belong to Android and can't be swapped by an app. The widget, wallpaper and screen saver above are the surfaces apps are allowed to take over.
 
 ## Project layout
 - `ClockRenderer.kt` – all drawing (lamps, shapes, glow, labels). Used by every surface.
@@ -44,4 +49,5 @@ Widgets can't run animations, so the clock is drawn as an image once a minute, t
 - `BinaryClockView.kt` – live, ticking clock view.
 - `ClockActivity.kt` – the app screen and settings.
 - `BinaryClockWidget.kt` – widget rendering and the minute alarm.
+- `BinaryClockWallpaper.kt` – the live wallpaper.
 - `BinaryClockDream.kt` – the screen saver.

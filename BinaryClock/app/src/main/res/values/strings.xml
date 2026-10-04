@@ -3,6 +3,8 @@
     <string name="app_name">Binary Clock</string>
     <string name="widget_name">Binary clock</string>
     <string name="widget_description">Hours and minutes in binary</string>
+    <string name="wallpaper_name">Binary clock</string>
+    <string name="wallpaper_note">A live wallpaper for the home and lock screens. It ticks every second while the screen is on. In the picker you can choose home, lock, or both.</string>
     <string name="dream_name">Binary clock</string>
     <string name="hint_tap">Tap the clock to hide these settings.</string>
     <string name="widget_note">Hours and minutes. Android widgets update once a minute, so there\'s no seconds row. The same widget works on the lock screen widget page.</string>
