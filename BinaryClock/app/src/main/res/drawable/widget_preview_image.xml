@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="220dp" android:height="80dp"
+    android:viewportWidth="220" android:viewportHeight="80">
+    <path android:fillColor="@color/lamp_off" android:fillAlpha="1" android:pathData="M41.00,20.00a15.00,15.00 0 1,0 30.00,0a15.00,15.00 0 1,0 -30.00,0ZM113.00,20.00a15.00,15.00 0 1,0 30.00,0a15.00,15.00 0 1,0 -30.00,0ZM185.00,20.00a15.00,15.00 0 1,0 30.00,0a15.00,15.00 0 1,0 -30.00,0ZM41.00,60.00a15.00,15.00 0 1,0 30.00,0a15.00,15.00 0 1,0 -30.00,0ZM113.00,60.00a15.00,15.00 0 1,0 30.00,0a15.00,15.00 0 1,0 -30.00,0ZM185.00,60.00a15.00,15.00 0 1,0 30.00,0a15.00,15.00 0 1,0 -30.00,0Z" />
+    <path android:fillColor="@color/accent" android:fillAlpha="1" android:pathData="M77.00,20.00a15.00,15.00 0 1,0 30.00,0a15.00,15.00 0 1,0 -30.00,0ZM149.00,20.00a15.00,15.00 0 1,0 30.00,0a15.00,15.00 0 1,0 -30.00,0ZM5.00,60.00a15.00,15.00 0 1,0 30.00,0a15.00,15.00 0 1,0 -30.00,0ZM77.00,60.00a15.00,15.00 0 1,0 30.00,0a15.00,15.00 0 1,0 -30.00,0ZM149.00,60.00a15.00,15.00 0 1,0 30.00,0a15.00,15.00 0 1,0 -30.00,0Z" />
+</vector>

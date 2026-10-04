@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Binary Clock</string>
+    <string name="widget_name">Binary clock</string>
+    <string name="widget_description">Hours and minutes in binary</string>
+    <string name="dream_name">Binary clock</string>
+    <string name="hint_tap">Tap the clock to hide these settings.</string>
+    <string name="widget_note">Hours and minutes. Android widgets update once a minute, so there\'s no seconds row. The same widget works on the lock screen widget page.</string>
+    <string name="dream_note">The full clock with seconds while charging. Choose \u201cBinary clock\u201d in the screen saver settings.</string>
+    <string name="widget_manual">Long-press your home screen, tap Widgets, and find Binary Clock.</string>
+</resources>
