@@ -7,7 +7,13 @@ A native port of the binary clock artifact. One app gives you four clocks:
 - **Live wallpaper** – home screen, lock screen, or both. Ticks every second while the screen is on and does nothing while it's off. On the lock screen the clock sits below the system clock.
 - **Screen saver** – full clock with seconds while charging; dark, dimmed, and drifting slightly to protect the screen.
 
-All of them share the same settings (colors, shapes, 12-hour time, bit order, and so on).
+Every place has its own settings (layout, colors, shapes, 12-hour time, bit order, and so on). Open the app and pick the place under **Editing settings for**: App, Home screen widget, Lock screen widget, Home screen wallpaper, Lock screen wallpaper, or Screen saver. The clock at the top previews the place you picked. **Copy settings from another place** starts one from another's look.
+
+Examples: rows on the home widget and columns on the lock screen; amber shapes on the wallpaper and plain lamps on the screen saver.
+
+- The widget is one widget, but it uses the lock screen settings whenever Android reports that it's sitting on the lock screen.
+- The wallpaper uses the lock screen settings only when applied to the lock screen alone. If you apply it to home and lock together, both use the home wallpaper settings. To give them different looks, apply the wallpaper twice, once for each screen.
+- Settings from the earlier version carry over to every place until you change them.
 
 **Vertical columns** turns each row into a column (hour, min, sec side by side), with values rising upward. **Hours on bottom / right** reverses the row order. Flip bit order puts the 1s at the top instead, and Show values becomes a single shared scale on the left. For the widget in this mode, resize it taller than it is wide.
 

@@ -12,7 +12,7 @@ class BinaryClockView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
 ) : View(context, attrs) {
 
-    var settings: ClockSettings = ClockSettings.load(context)
+    var settings: ClockSettings = ClockSettings.load(context, Surface.APP)
         set(value) {
             field = value
             spokenMinute = -1

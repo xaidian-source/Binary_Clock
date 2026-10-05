@@ -10,4 +10,10 @@
     <string name="widget_note">Hours and minutes. Android widgets update once a minute, so there\'s no seconds row. The same widget works on the lock screen widget page.</string>
     <string name="dream_note">The full clock with seconds while charging. Choose \u201cBinary clock\u201d in the screen saver settings.</string>
     <string name="widget_manual">Long-press your home screen, tap Widgets, and find Binary Clock.</string>
+    <string name="note_app">The full-screen clock you see when you open this app.</string>
+    <string name="note_widget">Home screen widget. Hours and minutes only, since Android widgets update once a minute.</string>
+    <string name="note_lock_widget">The same widget when it is placed on the lock screen. Android tells the app where the widget lives, so it can look different there.</string>
+    <string name="note_wallpaper_home">Live wallpaper behind your home screen. Also used when one wallpaper is applied to home and lock together.</string>
+    <string name="note_wallpaper_lock">Live wallpaper on the lock screen. To use these settings, apply the wallpaper to the lock screen only; the clock sits below the system clock.</string>
+    <string name="note_dream">The screen saver shown while charging. Always dark.</string>
 </resources>

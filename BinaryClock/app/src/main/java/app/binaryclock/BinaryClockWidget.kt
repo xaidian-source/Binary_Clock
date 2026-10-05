@@ -37,15 +37,14 @@ class BinaryClockWidget : AppWidgetProvider() {
     }
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, appWidgetIds: IntArray) {
-        val settings = ClockSettings.load(context)
-        appWidgetIds.forEach { render(context, manager, it, settings) }
+        appWidgetIds.forEach { render(context, manager, it) }
         scheduleNextTick(context)
     }
 
     override fun onAppWidgetOptionsChanged(
         context: Context, manager: AppWidgetManager, appWidgetId: Int, newOptions: Bundle,
     ) {
-        render(context, manager, appWidgetId, ClockSettings.load(context))
+        render(context, manager, appWidgetId)
     }
 
     override fun onDisabled(context: Context) {
@@ -63,14 +62,17 @@ class BinaryClockWidget : AppWidgetProvider() {
                 cancelTicks(context)
                 return
             }
-            val settings = ClockSettings.load(context)
-            ids.forEach { render(context, manager, it, settings) }
+            ids.forEach { render(context, manager, it) }
             scheduleNextTick(context)
         }
 
-        private fun render(context: Context, manager: AppWidgetManager, id: Int, settings: ClockSettings) {
+        private fun render(context: Context, manager: AppWidgetManager, id: Int) {
             // Size the bitmap to the widget's actual size (portrait width x portrait height).
             val opts = manager.getAppWidgetOptions(id)
+            // The same widget gets its own settings when the lock screen is hosting it.
+            val onLock = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1) ==
+                AppWidgetManager.WIDGET_CATEGORY_KEYGUARD
+            val settings = ClockSettings.load(context, if (onLock) Surface.LOCK_WIDGET else Surface.WIDGET)
             val density = context.resources.displayMetrics.density
             val wDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH).takeIf { it > 0 } ?: 250
             val hDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).takeIf { it > 0 } ?: 110

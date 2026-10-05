@@ -1,6 +1,7 @@
 package app.binaryclock
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.ActivityNotFoundException
@@ -20,8 +21,11 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import android.view.WindowManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -32,6 +36,7 @@ import android.widget.Toast
  */
 class ClockActivity : Activity() {
 
+    private var surface = Surface.APP
     private lateinit var settings: ClockSettings
     private lateinit var clock: BinaryClockView
     private lateinit var controls: View
@@ -43,7 +48,10 @@ class ClockActivity : Activity() {
         window.setDecorFitsSystemWindows(false)
         setContentView(R.layout.activity_clock)
 
-        settings = ClockSettings.load(this)
+        surface = Surface.entries.firstOrNull {
+            it.id == getSharedPreferences("binclock", MODE_PRIVATE).getString("editing", null)
+        } ?: Surface.APP
+        settings = ClockSettings.load(this, surface)
         clock = findViewById(R.id.clock)
         controls = findViewById(R.id.controls)
         list = findViewById(R.id.control_list)
@@ -54,7 +62,7 @@ class ClockActivity : Activity() {
             insets
         }
 
-        clock.settings = settings
+        showPreview()
         clock.setOnClickListener { setControlsVisible(!controlsVisible) }
 
         window.insetsController?.let { c ->
@@ -85,17 +93,46 @@ class ClockActivity : Activity() {
     private fun update(next: ClockSettings) {
         val relabel = next.vertical != settings.vertical
         settings = next
-        settings.save(this)
-        clock.settings = settings
+        settings.save(this, surface)
+        showPreview()
         applyKeepScreenOn()
         BinaryClockWidget.updateAll(this)
         // The "Hours on ..." label depends on the layout; rebuild after the toggle finishes.
         if (relabel) list.post { buildControls() }
     }
 
+    /** Shows the clock the way the selected place will draw it. */
+    private fun showPreview() {
+        clock.settings = settings
+        clock.showSeconds = surface.showsSeconds(settings)
+        val dark = surface.forcesDark(settings)
+        clock.forceDark = dark
+        val black = (surface == Surface.DREAM && settings.dreamBlack) || (surface.isWallpaper && settings.wallpaperBlack)
+        clock.setBackgroundColor(
+            when {
+                black -> Color.BLACK
+                dark -> ClockRenderer.DARK.panel
+                else -> Color.TRANSPARENT
+            },
+        )
+    }
+
+    private fun selectSurface(next: Surface) {
+        if (next == surface) return
+        surface = next
+        getSharedPreferences("binclock", MODE_PRIVATE).edit().putString("editing", next.id).apply()
+        settings = ClockSettings.load(this, surface)
+        showPreview()
+        buildControls()
+    }
+
+    // Keep-screen-on only applies to this app screen, whichever place is being edited.
     private fun applyKeepScreenOn() {
-        if (settings.keepScreenOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        if (ClockSettings.load(this, Surface.APP).keepScreenOn) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
     }
 
     // ---- Settings list ------------------------------------------------------
@@ -103,6 +140,11 @@ class ClockActivity : Activity() {
     private fun buildControls() {
         list.removeAllViews()
         note(getString(R.string.hint_tap))
+
+        header("Editing settings for")
+        surfacePicker()
+        note(getString(surfaceNote(surface)))
+        button("Copy settings from another place\u2026") { copyFromDialog() }
 
         header("Display")
         toggle("Show values", settings.showValues) { settings.copy(showValues = it) }
@@ -115,28 +157,74 @@ class ClockActivity : Activity() {
         toggle(
             if (settings.vertical) "Hours on right" else "Hours on bottom", settings.reverse,
         ) { settings.copy(reverse = it) }
-        toggle("Keep screen on", settings.keepScreenOn) { settings.copy(keepScreenOn = it) }
 
         header("Colors")
         swatchRow("hour", { it.colorHour }) { s, id -> s.copy(colorHour = id) }
         swatchRow("min", { it.colorMin }) { s, id -> s.copy(colorMin = id) }
-        swatchRow("sec", { it.colorSec }) { s, id -> s.copy(colorSec = id) }
+        if (!surface.isWidget) swatchRow("sec", { it.colorSec }) { s, id -> s.copy(colorSec = id) }
 
-        header("Widget")
-        note(getString(R.string.widget_note))
-        toggle("Widget background", settings.widgetBackground) { settings.copy(widgetBackground = it) }
-        button("Add widget to home screen") { pinWidget() }
+        when {
+            surface == Surface.APP -> {
+                header("Screen")
+                toggle("Keep screen on", settings.keepScreenOn) { settings.copy(keepScreenOn = it) }
+            }
+            surface.isWidget -> {
+                header("Widget")
+                toggle("Widget background", settings.widgetBackground) { settings.copy(widgetBackground = it) }
+                button("Add widget to home screen") { pinWidget() }
+            }
+            surface.isWallpaper -> {
+                header("Wallpaper")
+                toggle("Show seconds", settings.wallpaperSeconds) { settings.copy(wallpaperSeconds = it) }
+                toggle("Black background", settings.wallpaperBlack) { settings.copy(wallpaperBlack = it) }
+                button("Set as live wallpaper") { openWallpaperPicker() }
+            }
+            surface == Surface.DREAM -> {
+                header("Screen saver")
+                toggle("Black background", settings.dreamBlack) { settings.copy(dreamBlack = it) }
+                button("Open screen saver settings") { openDreamSettings() }
+            }
+        }
+    }
 
-        header("Wallpaper")
-        note(getString(R.string.wallpaper_note))
-        toggle("Show seconds", settings.wallpaperSeconds) { settings.copy(wallpaperSeconds = it) }
-        toggle("Black background", settings.wallpaperBlack) { settings.copy(wallpaperBlack = it) }
-        button("Set as live wallpaper") { openWallpaperPicker() }
+    private fun surfaceNote(s: Surface) = when (s) {
+        Surface.APP -> R.string.note_app
+        Surface.WIDGET -> R.string.note_widget
+        Surface.LOCK_WIDGET -> R.string.note_lock_widget
+        Surface.WALLPAPER_HOME -> R.string.note_wallpaper_home
+        Surface.WALLPAPER_LOCK -> R.string.note_wallpaper_lock
+        Surface.DREAM -> R.string.note_dream
+    }
 
-        header("Screen saver")
-        note(getString(R.string.dream_note))
-        toggle("Black background", settings.dreamBlack) { settings.copy(dreamBlack = it) }
-        button("Open screen saver settings") { openDreamSettings() }
+    private fun surfacePicker() {
+        val spinner = Spinner(this)
+        spinner.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_dropdown_item, Surface.entries.map { it.label },
+        )
+        spinner.setSelection(surface.ordinal, false)
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, v: View?, position: Int, id: Long) {
+                val next = Surface.entries[position]
+                if (next != surface) list.post { selectSurface(next) }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+        list.addView(spinner, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48f)))
+    }
+
+    private fun copyFromDialog() {
+        val others = Surface.entries.filter { it != surface }
+        AlertDialog.Builder(this)
+            .setTitle("Copy to ${surface.label} from\u2026")
+            .setItems(others.map { it.label }.toTypedArray()) { _, i ->
+                ClockSettings.copy(this, others[i], surface)
+                settings = ClockSettings.load(this, surface)
+                showPreview()
+                BinaryClockWidget.updateAll(this)
+                buildControls()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun dp(v: Float) =

@@ -3,7 +3,30 @@ package app.binaryclock
 import android.content.Context
 import android.content.SharedPreferences
 
-/** One set of preferences, read by the app, the widget and the screen saver. */
+/** Every place the clock can appear. Each one keeps its own copy of the settings. */
+enum class Surface(val id: String, val label: String) {
+    APP("app", "App"),
+    WIDGET("widget", "Home screen widget"),
+    LOCK_WIDGET("lockwidget", "Lock screen widget"),
+    WALLPAPER_HOME("wphome", "Home screen wallpaper"),
+    WALLPAPER_LOCK("wplock", "Lock screen wallpaper"),
+    DREAM("dream", "Screen saver");
+
+    val isWidget get() = this == WIDGET || this == LOCK_WIDGET
+    val isWallpaper get() = this == WALLPAPER_HOME || this == WALLPAPER_LOCK
+
+    /** Widgets can't tick, so they never show seconds. */
+    fun showsSeconds(s: ClockSettings) = when {
+        isWidget -> false
+        isWallpaper -> s.wallpaperSeconds
+        else -> true
+    }
+
+    /** True when the surface paints its own dark background regardless of the system theme. */
+    fun forcesDark(s: ClockSettings) = this == DREAM || (isWallpaper && s.wallpaperBlack)
+}
+
+/** One set of preferences per [Surface], read by the app, widgets, wallpaper and screen saver. */
 data class ClockSettings(
     val showValues: Boolean = true,
     val showDigits: Boolean = false,
@@ -22,24 +45,25 @@ data class ClockSettings(
     val colorMin: String = "default",
     val colorSec: String = "default",
 ) {
-    fun save(context: Context) {
+    fun save(context: Context, surface: Surface) {
+        val k = prefix(surface)
         store(context).edit()
-            .putBoolean("values", showValues)
-            .putBoolean("digits", showDigits)
-            .putBoolean("shapes", shapes)
-            .putBoolean("fade", fade)
-            .putBoolean("h12", h12)
-            .putBoolean("flip", flip)
-            .putBoolean("vertical", vertical)
-            .putBoolean("reverse", reverse)
-            .putBoolean("wake", keepScreenOn)
-            .putBoolean("widget_bg", widgetBackground)
-            .putBoolean("dream_black", dreamBlack)
-            .putBoolean("wp_seconds", wallpaperSeconds)
-            .putBoolean("wp_black", wallpaperBlack)
-            .putString("color_h", colorHour)
-            .putString("color_m", colorMin)
-            .putString("color_s", colorSec)
+            .putBoolean("${k}values", showValues)
+            .putBoolean("${k}digits", showDigits)
+            .putBoolean("${k}shapes", shapes)
+            .putBoolean("${k}fade", fade)
+            .putBoolean("${k}h12", h12)
+            .putBoolean("${k}flip", flip)
+            .putBoolean("${k}vertical", vertical)
+            .putBoolean("${k}reverse", reverse)
+            .putBoolean("${k}wake", keepScreenOn)
+            .putBoolean("${k}widget_bg", widgetBackground)
+            .putBoolean("${k}dream_black", dreamBlack)
+            .putBoolean("${k}wp_seconds", wallpaperSeconds)
+            .putBoolean("${k}wp_black", wallpaperBlack)
+            .putString("${k}color_h", colorHour)
+            .putString("${k}color_m", colorMin)
+            .putString("${k}color_s", colorSec)
             .apply()
     }
 
@@ -47,26 +71,37 @@ data class ClockSettings(
         private fun store(context: Context): SharedPreferences =
             context.getSharedPreferences("binclock", Context.MODE_PRIVATE)
 
-        fun load(context: Context): ClockSettings {
+        private fun prefix(surface: Surface) = surface.id + "."
+
+        /** Replaces one surface's settings with a copy of another's. */
+        fun copy(context: Context, from: Surface, to: Surface) = load(context, from).save(context, to)
+
+        fun load(context: Context, surface: Surface): ClockSettings {
             val p = store(context)
             val d = ClockSettings()
+            val k = prefix(surface)
+            // A surface that has never been customised falls back to the old shared
+            // setting, so settings from earlier versions carry over to every surface.
+            fun bool(key: String, def: Boolean) = p.getBoolean(k + key, p.getBoolean(key, def))
+            fun str(key: String, def: String) =
+                p.getString(k + key, null) ?: p.getString(key, null) ?: def
             return ClockSettings(
-                showValues = p.getBoolean("values", d.showValues),
-                showDigits = p.getBoolean("digits", d.showDigits),
-                shapes = p.getBoolean("shapes", d.shapes),
-                fade = p.getBoolean("fade", d.fade),
-                h12 = p.getBoolean("h12", d.h12),
-                flip = p.getBoolean("flip", d.flip),
-                vertical = p.getBoolean("vertical", d.vertical),
-                reverse = p.getBoolean("reverse", d.reverse),
-                keepScreenOn = p.getBoolean("wake", d.keepScreenOn),
-                widgetBackground = p.getBoolean("widget_bg", d.widgetBackground),
-                dreamBlack = p.getBoolean("dream_black", d.dreamBlack),
-                wallpaperSeconds = p.getBoolean("wp_seconds", d.wallpaperSeconds),
-                wallpaperBlack = p.getBoolean("wp_black", d.wallpaperBlack),
-                colorHour = p.getString("color_h", null) ?: d.colorHour,
-                colorMin = p.getString("color_m", null) ?: d.colorMin,
-                colorSec = p.getString("color_s", null) ?: d.colorSec,
+                showValues = bool("values", d.showValues),
+                showDigits = bool("digits", d.showDigits),
+                shapes = bool("shapes", d.shapes),
+                fade = bool("fade", d.fade),
+                h12 = bool("h12", d.h12),
+                flip = bool("flip", d.flip),
+                vertical = bool("vertical", d.vertical),
+                reverse = bool("reverse", d.reverse),
+                keepScreenOn = bool("wake", d.keepScreenOn),
+                widgetBackground = bool("widget_bg", d.widgetBackground),
+                dreamBlack = bool("dream_black", d.dreamBlack),
+                wallpaperSeconds = bool("wp_seconds", d.wallpaperSeconds),
+                wallpaperBlack = bool("wp_black", d.wallpaperBlack),
+                colorHour = str("color_h", d.colorHour),
+                colorMin = str("color_m", d.colorMin),
+                colorSec = str("color_s", d.colorSec),
             )
         }
     }

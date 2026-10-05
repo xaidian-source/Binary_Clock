@@ -32,7 +32,7 @@ class BinaryClockDream : DreamService() {
         isFullscreen = true
         isScreenBright = false  // dimmed, for the nightstand
 
-        val settings = ClockSettings.load(this)
+        val settings = ClockSettings.load(this, Surface.DREAM)
         val view = BinaryClockView(this).apply {
             this.settings = settings
             forceDark = true
