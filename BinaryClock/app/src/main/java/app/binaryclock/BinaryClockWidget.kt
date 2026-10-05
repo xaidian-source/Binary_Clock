@@ -4,7 +4,6 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
-import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -70,10 +69,7 @@ class BinaryClockWidget : AppWidgetProvider() {
         private fun render(context: Context, manager: AppWidgetManager, id: Int) {
             // Size the bitmap to the widget's actual size (portrait width x portrait height).
             val opts = manager.getAppWidgetOptions(id)
-            // The same widget gets its own settings when the lock screen is hosting it.
-            val onLock = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1) ==
-                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
-            val settings = ClockSettings.load(context, if (onLock) Surface.LOCK_WIDGET else Surface.WIDGET)
+            val settings = ClockSettings.load(context, Surface.WIDGET)
             val density = context.resources.displayMetrics.density
             val wDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH).takeIf { it > 0 } ?: 250
             val hDp = opts.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT).takeIf { it > 0 } ?: 110

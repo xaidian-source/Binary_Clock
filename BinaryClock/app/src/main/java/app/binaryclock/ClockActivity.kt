@@ -190,7 +190,6 @@ class ClockActivity : Activity() {
     private fun surfaceNote(s: Surface) = when (s) {
         Surface.APP -> R.string.note_app
         Surface.WIDGET -> R.string.note_widget
-        Surface.LOCK_WIDGET -> R.string.note_lock_widget
         Surface.WALLPAPER_HOME -> R.string.note_wallpaper_home
         Surface.WALLPAPER_LOCK -> R.string.note_wallpaper_lock
         Surface.DREAM -> R.string.note_dream

@@ -6,13 +6,12 @@ import android.content.SharedPreferences
 /** Every place the clock can appear. Each one keeps its own copy of the settings. */
 enum class Surface(val id: String, val label: String) {
     APP("app", "App"),
-    WIDGET("widget", "Home screen widget"),
-    LOCK_WIDGET("lockwidget", "Lock screen widget"),
+    WIDGET("widget", "Widget"),
     WALLPAPER_HOME("wphome", "Home screen wallpaper"),
     WALLPAPER_LOCK("wplock", "Lock screen wallpaper"),
     DREAM("dream", "Screen saver");
 
-    val isWidget get() = this == WIDGET || this == LOCK_WIDGET
+    val isWidget get() = this == WIDGET
     val isWallpaper get() = this == WALLPAPER_HOME || this == WALLPAPER_LOCK
 
     /** Widgets can't tick, so they never show seconds. */
