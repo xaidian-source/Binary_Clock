@@ -14,8 +14,6 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
-        with:
-          build-root-directory: BinaryClock
       - run: chmod +x gradlew
         working-directory: BinaryClock
       - run: ./gradlew assembleDebug
